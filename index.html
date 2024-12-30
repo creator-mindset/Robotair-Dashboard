@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Robot Fleet Monitoring Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.0/chart.min.js"></script>
+</head>
+
+<body>
+    <div class="theme-switch">
+        <label class="switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider round"></span>
+        </label>
+        <span>Dark Mode</span>
+    </div>
+
+    <div class="dashboard-container">
+        <header>
+            <h1>Robot Fleet Command Center</h1>
+            <div class="header-stats">
+                <div class="stat-box">
+                    <span class="stat-label">Active Robots</span>
+                    <span class="stat-value" id="activeRobots">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Tasks Completed</span>
+                    <span class="stat-value" id="tasksCompleted">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Fleet Health</span>
+                    <span class="stat-value" id="fleetHealth">0%</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Energy Efficiency</span>
+                    <span class="stat-value" id="energyEfficiency">0%</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-content">
+            <div class="left-panel">
+                <div class="map-section">
+                    <div class="map-controls">
+                        <button id="togglePaths">Toggle Paths</button>
+                        <button id="toggleGeofence">Toggle Geofence</button>
+                        <select id="mapStyle">
+                            <option value="standard">Standard</option>
+                            <option value="satellite">Satellite</option>
+                            <option value="night">Night Mode</option>
+                        </select>
+                    </div>
+                    <div id="robotMap"></div>
+                </div>
+
+                <div class="analytics-section">
+                    <h2>Performance Analytics</h2>
+                    <div class="charts-container">
+                        <div class="chart-box">
+                            <canvas id="efficiencyChart"></canvas>
+                        </div>
+                        <div class="chart-box">
+                            <canvas id="taskCompletionChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="right-panel">
+                <div class="robot-list">
+                    <h2>Robot Fleet</h2>
+                    <div class="robot-filters">
+                        <input type="text" id="robotSearch" placeholder="Search robots...">
+                        <select id="statusFilter">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="inactive">Inactive</option>
+                            <option value="maintenance">Maintenance</option>
+                        </select>
+                    </div>
+                    <div class="robot-cards" id="robotCards"></div>
+                </div>
+
+                <div class="task-scheduler">
+                    <h2>Task Scheduler</h2>
+                    <div class="scheduler-controls">
+                        <select id="robotSelect">
+                            <option value="">Select Robot</option>
+                        </select>
+                        <select id="taskType">
+                            <option value="">Select Task</option>
+                            <option value="patrol">Patrol</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="maintenance">Maintenance</option>
+                        </select>
+                        <input type="datetime-local" id="taskTime">
+                        <button id="scheduleTask">Schedule Task</button>
+                    </div>
+                    <div id="scheduledTasks" class="scheduled-tasks"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-panel">
+            <div class="alerts-panel">
+                <h2>System Alerts</h2>
+                <div class="alert-filters">
+                    <button class="alert-filter active" data-type="all">All</button>
+                    <button class="alert-filter" data-type="error">Errors</button>
+                    <button class="alert-filter" data-type="warning">Warnings</button>
+                    <button class="alert-filter" data-type="info">Info</button>
+                </div>
+                <div id="alertsList" class="alerts-list"></div>
+            </div>
+
+            <div class="maintenance-panel">
+                <h2>Maintenance Schedule</h2>
+                <div id="maintenanceCalendar" class="maintenance-calendar">
+                    <!-- Placeholder for calendar or schedule visuals -->
+                    <p>View upcoming tasks in the calendar.</p>
+                </div>
+
+                <!-- Section: Scheduled Maintenance -->
+                <section class="maintenance-section">
+                    <h3>Scheduled Maintenance</h3>
+                    <ul>
+                        <li>
+                            <strong>Oil Change:</strong>
+                            <span>Every 3 months</span>
+                            <p class="description">Ensure smooth engine operation by changing the oil regularly. Recommended oil types: Synthetic, Semi-synthetic.</p>
+                        </li>
+                        <li>
+                            <strong>Inspection:</strong>
+                            <span>Every 6 months</span>
+                            <p class="description">Comprehensive check-up including brakes, lights, and filters to prevent long-term issues.</p>
+                        </li>
+                        <li>
+                            <strong>Parts Replacement:</strong>
+                            <span>As needed</span>
+                            <p class="description">Replace worn-out parts promptly to ensure safety and efficiency.</p>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Section: Preventative Maintenance -->
+                <section class="maintenance-section">
+                    <h3>Preventative Maintenance</h3>
+                    <ul>
+                        <li>
+                            <strong>Tire Rotation:</strong>
+                            <span>Every 10,000 km</span>
+                            <p class="description">Rotate tires to ensure even wear and extend tire life.</p>
+                        </li>
+                        <li>
+                            <strong>Battery Check:</strong>
+                            <span>Annually</span>
+                            <p class="description">Inspect battery for corrosion and charge levels to avoid sudden breakdowns.</p>
+                        </li>
+                    </ul>
+                </section>
+
+                <!-- Section: Emergency Maintenance -->
+                <section class="maintenance-section">
+                    <h3>Emergency Maintenance</h3>
+                    <ul>
+                        <li>
+                            <strong>Brake Repair:</strong>
+                            <span>As required</span>
+                            <p class="description">Address any squeaking or grinding noises immediately to ensure safety.</p>
+                        </li>
+                        <li>
+                            <strong>Fluid Refill:</strong>
+                            <span>As needed</span>
+                            <p class="description">Top up essential fluids like coolant, brake fluid, and power steering fluid.</p>
+                        </li>
+                    </ul>
+                </section>
+            </div>
+
+        </div>
+
+        <template id="robotCardTemplate">
+        <div class="robot-card">
+            <div class="robot-image">
+                <img src="/api/placeholder/150/150" alt="Robot">
+                <div class="status-indicator"></div>
+            </div>
+            <div class="robot-info">
+                <h3 class="robot-name"></h3>
+                <div class="robot-status"></div>
+                <div class="sensor-readings">
+                    <div class="sensor">
+                        <span class="sensor-label">Temperature</span>
+                        <span class="sensor-value temperature"></span>
+                    </div>
+                    <div class="sensor">
+                        <span class="sensor-label">Speed</span>
+                        <span class="sensor-value speed"></span>
+                    </div>
+                    <div class="sensor">
+                        <span class="sensor-label">Load</span>
+                        <span class="sensor-value load"></span>
+                    </div>
+                </div>
+                <div class="battery-indicator">
+                    <div class="battery-level"></div>
+                    <span class="battery-text"></span>
+                </div>
+                <div class="robot-details">
+                    <p class="location"></p>
+                    <p class="current-task"></p>
+                    <p class="uptime"></p>
+                    <p class="next-maintenance"></p>
+                </div>
+                <div class="robot-controls">
+                    <button class="control-btn start-stop">Start/Stop</button>
+                    <button class="control-btn emergency-stop">Emergency Stop</button>
+                    <button class="control-btn view-details">Details</button>
+                </div>
+            </div>
+        </div>
+    </template>
+
+        <div id="robotDetailsModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal">&times;</span>
+                <div class="robot-details-content"></div>
+            </div>
+        </div>
+
+        <script src="server.js"></script>
+</body>
+
+</html>
